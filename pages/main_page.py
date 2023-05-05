@@ -1,7 +1,7 @@
 #  импорт базового класса BasePage
 from .base_page import BasePage
 from .locators import MainPageLocators
-from .login_page import LoginPage
+# from .login_page import LoginPage
 
 
 # класс MainPage - наследник класса BasePage
