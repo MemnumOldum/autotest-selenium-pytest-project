@@ -1,30 +1,3 @@
-# Открываем страницу товара (http://selenium1py.pythonanywhere.com/catalogue/the-shellcoders-handbook_209/?promo=newYear).
-# Обратите внимание, что в ссылке есть параметр "?promo=newYear". Не теряйте его в авто-тесте, чтобы получить проверочный
-# код.
-# Нажимаем на кнопку "Добавить в корзину".
-# *Посчитать результат математического выражения и ввести ответ. Используйте для этого метод solve_quiz_and_get_code(),
-# который приведен ниже. Например, можете добавить его в класс BasePage, чтобы использовать его на любой странице.
-# Этот метод нужен только для проверки того, что вы написали тест на Selenium. После этого вы получите код, который
-# нужно ввести в качестве ответа на данное задание. Код будет выведен в консоли интерпретатора, в котором вы запускаете
-# тест. Не забудьте в конце теста добавить проверки на ожидаемый результат.
-
-# Попробуйте запустить автотест, который мы написали на предыдущем шаге, на странице
-# http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=newYear2019.
-#
-# Чтобы тест был независимым от контента:
-#
-# Измените методы проверки таким образом, чтобы они принимали как аргумент название товара и цену товара.
-# Сделайте метод, который вытаскивает из элемента текст-название товара и возвращает его.
-# Сделайте такой же метод для цены.
-# Теперь проверяйте, что название товара в сообщении совпадает с заголовком товара.
-
-# К счастью, нам не придется менять наш тест, чтобы проверить изменения в коде. Мы просто запустим всё тот же тест на
-# странице http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/ с параметризацией. Вам нужно определить,
-# при каком значении параметра promo автотест упадет. Для этого проверьте результат работы PyTest и найдите url, на
-# котором произошла ошибка. Значение параметра может изменяться от offer0 до offer9.
-# После того как вы обнаружили баг, учитывая что чинить его не собираются, лучше всего пометить падающий тест как
-# xfail или skip.
-
 from pages.product_page import ProductPage
 from pages.login_page import LoginPage
 from pages.basket_page import BasketPage
@@ -32,6 +5,7 @@ from pages.main_page import MainPage
 import pytest
 
 
+@pytest.mark.need_review
 @pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0",
                                   "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer1",
                                   "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer2",
@@ -86,6 +60,7 @@ def test_guest_should_see_login_link_on_product_page(browser):
     page.should_be_login_link()
 
 
+@pytest.mark.need_review
 def test_guest_can_go_to_login_page_from_product_page(browser):
     link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
     page = ProductPage(browser, link)
@@ -95,6 +70,7 @@ def test_guest_can_go_to_login_page_from_product_page(browser):
     login_page.should_be_login_page()
 
 
+@pytest.mark.need_review
 def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
     link = "http://selenium1py.pythonanywhere.com/"
     page = MainPage(browser, link)
@@ -103,3 +79,35 @@ def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
     basket_page = BasketPage(browser, url=browser.current_url)
     basket_page.should_not_items_disappeared()
     basket_page.basket_is_empty_text()
+
+
+class TestUserAddToBasketFromProductPage():
+
+    # фикстура setup, выполняет регистрацию нового пользователя для каждого из 2-х следующих тестов и проверяет,
+    # что пользователь авторизован на сайте
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, browser):
+        link = "http://selenium1py.pythonanywhere.com"
+        page = MainPage(browser, link)
+        page.open()
+        page.go_to_login_page()
+        login_page = LoginPage(browser, browser.current_url)
+        login_page.register_new_user()
+        login_page.should_be_authorized_user()
+
+    def test_user_cant_see_success_message(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/studyguide-for-counter-hack-reloaded_205/"
+        page = ProductPage(browser, link)
+        page.open()
+        page.should_not_be_success_message()
+
+    @pytest.mark.need_review
+    def test_user_can_add_product_to_basket(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/studyguide-for-counter-hack-reloaded_205/"
+        page = ProductPage(browser, link)
+        page.open()
+        page.add_to_cart()
+        browser.implicitly_wait(3)
+        page.product_in_cart()
+        page.cart_price()
+
