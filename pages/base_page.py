@@ -5,6 +5,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from .locators import BasePageLocators
+import time
 
 
 class BasePage():
@@ -66,5 +67,18 @@ class BasePage():
     def go_to_cart(self):
         link = self.browser.find_element(*BasePageLocators.CART_LINK)
         link.click()
+
+    def should_be_authorized_user(self):
+        assert self.is_element_present(*BasePageLocators.USER_ICON), "User icon is not presented," \
+                                                                     " probably unauthorised user"
+
+    def give_email(self):
+        email = str(time.time()) + "@fakemail.org"
+        return email
+
+    def give_password(self):
+        password = str(time.time())
+        return password
+
 
 
