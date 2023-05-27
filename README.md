@@ -1,2 +1,2 @@
-# 4_Page_Object
-autotest_pytest_project
+Тестовый проект в стиле PageObject на Python
+
